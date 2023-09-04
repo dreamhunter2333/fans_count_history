@@ -1,0 +1,15 @@
+name = "fans_history"
+main = "src/worker.js"
+compatibility_date = "2023-08-14"
+node_compat = true
+
+[triggers]
+crons = [ "0 0 * * *" ]
+
+[vars]
+JWT_SECRET = "xxx"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "xxx"
+database_id = "xxxx"

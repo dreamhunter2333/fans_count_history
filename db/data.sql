@@ -1,0 +1,11 @@
+INSERT into fans_accounts (ref_id, name, source) values ('946974', '影视飓风', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('29440965', '超级小桀', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('382666849', '笔记本维修厮', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('63231', '泛式', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('470962000', '落九川', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('14110780', '凉风Kaze', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('18343098', '河野华', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('11643866', '汤姆的混乱空间', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('163637592', '老师好我叫何同学', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('337521240', '记录生活的蛋黄派', 'bilibili');
+INSERT into fans_accounts (ref_id, name, source) values ('208259', '陈睿', 'bilibili');

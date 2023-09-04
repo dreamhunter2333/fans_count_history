@@ -1,0 +1,207 @@
+<template>
+  <div class="main">
+    <div class="header">
+      <h3>哔哩哔哩 UP 粉丝数量动态图</h3>
+      <n-select v-model:value="selected" multiple :options="selectOptions" placeholder="请选择需要查看的 UP" />
+    </div>
+    <v-chart class="chart" :option="option" autoresize />
+    <v-chart :key="chartKey" class="chart" :option="option_bar" autoresize />
+  </div>
+</template>
+
+<script setup>
+import { use } from 'echarts/core'
+import { LineChart, BarChart } from 'echarts/charts'
+import { LegendComponent, GridComponent, TitleComponent, TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+import VChart, { THEME_KEY } from 'vue-echarts';
+import { ref, provide, onMounted, watch } from 'vue';
+import { NSelect } from 'naive-ui';
+
+const API_BASE = import.meta.env.VITE_API_BASE || "";
+
+use([
+  LegendComponent,
+  TitleComponent,
+  GridComponent,
+  TooltipComponent,
+  LineChart,
+  BarChart,
+  CanvasRenderer
+])
+// provide(THEME_KEY, 'dark');
+const dates_ref = ref([]);
+const series_ref = ref([]);
+const selected = ref([]);
+const selectOptions = ref([]);
+
+const option = ref({
+  title: {
+    text: '粉丝数量折线图',
+    top: 'left'
+  },
+  tooltip: {
+    trigger: 'axis',
+    confine: true
+  },
+  legend: {
+    type: 'scroll',
+    orient: 'vertical',
+    right: 10,
+    top: 20,
+    bottom: 20,
+    selected: {},
+    selectedMode: false,
+  },
+  xAxis: {
+    type: 'category',
+    data: []
+  },
+  yAxis: {
+    type: 'value',
+    max: (value) => Math.ceil(value.max / 1000 * 1.1) * 1000,
+    min: (value) => Math.floor(value.min / 1000 * 0.9) * 1000,
+  },
+  series: []
+});
+
+const option_bar = ref({
+  title: {
+    text: '粉丝数量动态图',
+    top: 'left'
+  },
+  xAxis: {
+    max: 'dataMax'
+  },
+  yAxis: {
+    type: 'category',
+    data: {},
+    inverse: true,
+    animationDuration: 300,
+    animationDurationUpdate: 300,
+    // max: 2 // only the largest 3 bars will be displayed
+  },
+  series: [
+    {
+      realtimeSort: true,
+      name: 'Fans',
+      type: 'bar',
+      data: [],
+      label: {
+        show: true,
+        position: 'right',
+        valueAnimation: true
+      },
+      itemStyle: {
+        normal: {
+          color: function () { return "#" + Math.floor(Math.random() * (256 * 256 * 256 - 1)).toString(16); }
+        },
+      }
+    }
+  ],
+  legend: {
+    show: true
+  },
+  animationDuration: 3000,
+  animationDurationUpdate: 3000,
+  animationEasing: 'linear',
+  animationEasingUpdate: 'linear'
+});
+
+const refresh = async () => {
+  const response = await fetch(`${API_BASE}/api/line_chart`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json"
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`${response.status} ${await response.text()}` || "error");
+  }
+  let res = await response.json();
+  const { dates, series } = res;
+  dates_ref.value = dates;
+  series_ref.value = series;
+  option.value.xAxis.data = dates;
+  option.value.series = series.map((s) => ({
+    name: s.name,
+    data: s.data,
+    connectNulls: true,
+    type: 'line'
+  }));
+  option_bar.value.yAxis.data = series.map((s) => s.name);
+  selectOptions.value = series.map((s) => ({ label: s.name, value: s.name }));
+}
+
+const bar_index = ref(0);
+const timeoutId = ref(null);
+
+const update_bar_chart = () => {
+  if (bar_index.value >= dates_ref.value.length) {
+    return;
+  }
+  option_bar.value.series[0].data = series_ref.value
+    .filter((s) => option_bar.value.yAxis.data.includes(s.name))
+    .map((s) => s.data[bar_index.value]);
+  option_bar.value.series[0].name = dates_ref.value[bar_index.value];
+  bar_index.value += 1;
+  timeoutId.value = setTimeout(update_bar_chart, 1000);
+}
+
+const chartKey = ref(0);
+
+watch(selected, (newVal) => {
+  chartKey.value += 1;
+  if (timeoutId.value) {
+    clearTimeout(timeoutId.value);
+  }
+  bar_index.value = 0;
+  if (newVal.length === 0) {
+    option.value.legend.selected = series_ref.value.reduce((acc, cur) => {
+      acc[cur.name] = true;
+      return acc;
+    }, {});
+    option_bar.value.yAxis.data = series_ref.value.map((s) => s.name);
+  } else {
+    option_bar.value.yAxis.data = series_ref.value.reduce((acc, cur) => {
+      if (newVal.includes(cur.name)) {
+        acc.push(cur.name);
+      }
+      return acc;
+    }, []);
+    option.value.legend.selected = series_ref.value.reduce((acc, cur) => {
+      acc[cur.name] = newVal.includes(cur.name);
+      return acc;
+    }, {});
+  }
+  update_bar_chart();
+});
+
+onMounted(async () => {
+  await refresh();
+  update_bar_chart();
+});
+</script>
+
+<style scoped>
+.main {
+  height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.n-select {
+  width: 80%;
+}
+
+.chart {
+  height: 45vh;
+}
+</style>
