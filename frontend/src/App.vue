@@ -5,10 +5,10 @@
       placeholder="请选择需要查看的 UP" />
     <n-select v-else v-model:value="selectedForTable" :options="selectOptions" placeholder="请选择需要查看的 UP" />
     <n-tabs type="segment" v-model:value="chartType">
-      <n-tab-pane name="line" tab="粉丝数量折线图">
+      <n-tab-pane name="line" tab="折线图">
         <v-chart :option="option" autoresize />
       </n-tab-pane>
-      <n-tab-pane name="bar" tab="粉丝数量动态图">
+      <n-tab-pane name="bar" tab="动态图">
         <v-chart :key="chartKey" :option="option_bar" autoresize />
       </n-tab-pane>
       <n-tab-pane name="table" tab="表格">
