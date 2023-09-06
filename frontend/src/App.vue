@@ -1,11 +1,20 @@
 <template>
   <div class="main">
-    <div class="header">
-      <h3>哔哩哔哩 UP 粉丝数量动态图</h3>
-      <n-select v-model:value="selected" multiple :options="selectOptions" placeholder="请选择需要查看的 UP" />
-    </div>
-    <v-chart class="chart" :option="option" autoresize />
-    <v-chart :key="chartKey" class="chart" :option="option_bar" autoresize />
+    <h3>哔哩哔哩 UP 粉丝数量监控</h3>
+    <n-select v-if="chartType !== 'table'" v-model:value="selected" multiple :options="selectOptions"
+      placeholder="请选择需要查看的 UP" />
+    <n-select v-else v-model:value="selectedForTable" :options="selectOptions" placeholder="请选择需要查看的 UP" />
+    <n-tabs type="segment" v-model:value="chartType">
+      <n-tab-pane name="line" tab="粉丝数量折线图">
+        <v-chart :option="option" autoresize />
+      </n-tab-pane>
+      <n-tab-pane name="bar" tab="粉丝数量动态图">
+        <v-chart :key="chartKey" :option="option_bar" autoresize />
+      </n-tab-pane>
+      <n-tab-pane name="table" tab="表格">
+        <n-data-table :columns="columns" :data="tableData" :bordered="false" />
+      </n-tab-pane>
+    </n-tabs>
   </div>
 </template>
 
@@ -17,7 +26,8 @@ import { CanvasRenderer } from 'echarts/renderers'
 
 import VChart, { THEME_KEY } from 'vue-echarts';
 import { ref, provide, onMounted, watch } from 'vue';
-import { NSelect } from 'naive-ui';
+import { NSelect, NTabs, NTabPane, NDataTable } from 'naive-ui';
+import { useStorage } from '@vueuse/core'
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 
@@ -33,14 +43,27 @@ use([
 // provide(THEME_KEY, 'dark');
 const dates_ref = ref([]);
 const series_ref = ref([]);
-const selected = ref([]);
+const selected = useStorage('selected', [])
+const selectedForTable = useStorage('selectedForTable', null)
 const selectOptions = ref([]);
+const chartType = useStorage('chartType', 'line');
+const columns = [
+  {
+    title: "日期",
+    key: "date"
+  },
+  {
+    title: "数量",
+    key: "fans"
+  },
+  {
+    title: "数量变化",
+    key: "delta"
+  }
+]
+const tableData = ref([]);
 
 const option = ref({
-  title: {
-    text: '粉丝数量折线图',
-    top: 'left'
-  },
   tooltip: {
     trigger: 'axis',
     confine: true
@@ -67,10 +90,6 @@ const option = ref({
 });
 
 const option_bar = ref({
-  title: {
-    text: '粉丝数量动态图',
-    top: 'left'
-  },
   xAxis: {
     max: 'dataMax'
   },
@@ -152,7 +171,7 @@ const update_bar_chart = () => {
 
 const chartKey = ref(0);
 
-watch(selected, (newVal) => {
+const updateChartData = (newVal) => {
   chartKey.value += 1;
   if (timeoutId.value) {
     clearTimeout(timeoutId.value);
@@ -177,20 +196,39 @@ watch(selected, (newVal) => {
     }, {});
   }
   update_bar_chart();
-});
+}
+
+watch(selected, (newVal) => updateChartData(newVal));
+
+const updateTableDate = (newVal) => {
+  if (!newVal) {
+    tableData.value = [];
+    return;
+  }
+  const index = series_ref.value.findIndex((s) => s.name == newVal);
+  if (index === -1) {
+    tableData.value = [];
+    return;
+  }
+  tableData.value = dates_ref.value.map((date, i) => ({
+    date: date,
+    fans: series_ref.value[index].data[i],
+    delta: i === 0 ? undefined : series_ref.value[index].data[i] - series_ref.value[index].data[i - 1]
+  })).reverse();
+}
+
+watch(selectedForTable, (newVal) => updateTableDate(newVal));
 
 onMounted(async () => {
   await refresh();
-  update_bar_chart();
+  updateChartData(selected.value);
+  updateTableDate(selectedForTable.value);
 });
 </script>
 
 <style scoped>
 .main {
   height: 100vh;
-}
-
-.header {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -201,7 +239,11 @@ onMounted(async () => {
   width: 80%;
 }
 
-.chart {
-  height: 45vh;
+.n-tabs {
+  width: 80%;
+}
+
+.n-tab-pane {
+  height: 75vh;
 }
 </style>

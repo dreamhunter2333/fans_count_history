@@ -10,6 +10,7 @@
     "deploy": "wrangler pages deploy dist --branch production"
   },
   "dependencies": {
+    "@vueuse/core": "^10.4.1",
     "echarts": "^5.4.2",
     "vue": "^3.2.47",
     "vue-echarts": "latest"
