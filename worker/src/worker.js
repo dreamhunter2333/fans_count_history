@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors';
 import { jwt } from 'hono/jwt'
+import { cache } from 'hono/cache'
 
 import { api } from './router';
 import { crawler } from './crawler';
@@ -16,6 +17,13 @@ api.get('/admin/crawler', async (c) => {
 	await crawler(null, c.env, null);
 	return c.json({ success: true });
 })
+app.get(
+	'/api/*',
+	cache({
+		cacheName: 'app-cache',
+		cacheControl: 'max-age=3600',
+	})
+)
 
 app.route('/', api)
 
