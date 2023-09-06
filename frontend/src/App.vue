@@ -66,7 +66,8 @@ const tableData = ref([]);
 const option = ref({
   tooltip: {
     trigger: 'axis',
-    confine: true
+    confine: true,
+    order: 'valueDesc'
   },
   legend: {
     type: 'scroll',
