@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --emptyOutDir",
+    "build": "vite build --emptyOutDir -m prod",
     "preview": "vite preview",
     "deploy": "wrangler pages deploy dist --branch production"
   },
