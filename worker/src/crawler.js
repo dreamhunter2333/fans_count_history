@@ -34,7 +34,7 @@ async function handle_bilibili(account) {
         `https://api.bilibili.com/x/relation/stat?vmid=${account.ref_id}&jsonp=jsonp`,
         {
             headers: {
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
             }
         }
     )

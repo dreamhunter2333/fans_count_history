@@ -13,10 +13,11 @@ app.use('/admin/*', async (c, next) => {
 	return jwt({ secret: c.env.JWT_SECRET })(c, next);
 });
 
-api.get('/admin/crawler', async (c) => {
+api.post('/admin/crawler', async (c) => {
 	await crawler(null, c.env, null);
 	return c.json({ success: true });
 })
+
 app.get(
 	'/api/*',
 	cache({

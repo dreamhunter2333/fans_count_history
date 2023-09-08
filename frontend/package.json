@@ -13,7 +13,8 @@
     "@vueuse/core": "^10.4.1",
     "echarts": "^5.4.2",
     "vue": "^3.2.47",
-    "vue-echarts": "latest"
+    "vue-echarts": "latest",
+    "vue-router": "^4.2.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",
