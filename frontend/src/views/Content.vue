@@ -2,23 +2,25 @@
   <n-spin description="loading..." :show="loading">
     <div class="main">
       <h3>哔哩哔哩 UP 粉丝数量监控</h3>
-      <n-input-group>
-        <n-select v-if="chartType !== 'table'" v-model:value="selected" multiple :options="selectOptions"
-          placeholder="请选择需要查看的 UP" />
-        <n-select v-else v-model:value="selectedForTable" :options="selectOptions" placeholder="请选择需要查看的 UP" />
-        <n-button @click="showModal = true" tertiary type="primary">提交新 UP</n-button>
-      </n-input-group>
-      <n-tabs type="segment" v-model:value="chartType">
-        <n-tab-pane name="line" tab="折线图">
-          <v-chart :key="chartKey" :option="option" autoresize />
-        </n-tab-pane>
-        <n-tab-pane name="bar" tab="动态图">
-          <v-chart :key="chartKey" :option="option_bar" autoresize />
-        </n-tab-pane>
-        <n-tab-pane name="table" tab="表格">
-          <n-data-table :columns="columns" :data="tableData" :bordered="false" />
-        </n-tab-pane>
-      </n-tabs>
+      <div class="chart-container">
+        <n-tabs type="segment" v-model:value="chartType">
+          <n-tab-pane name="line" tab="折线图">
+          </n-tab-pane>
+          <n-tab-pane name="bar" tab="动态图">
+          </n-tab-pane>
+          <n-tab-pane name="table" tab="表格">
+          </n-tab-pane>
+        </n-tabs>
+        <n-input-group>
+          <n-select v-if="chartType !== 'table'" v-model:value="selected" multiple :options="selectOptions"
+            placeholder="请选择需要查看的 UP" />
+          <n-select v-else v-model:value="selectedForTable" :options="selectOptions" placeholder="请选择需要查看的 UP" />
+          <n-button @click="showModal = true" tertiary type="primary">提交新 UP</n-button>
+        </n-input-group>
+        <v-chart class="chart" v-if="chartType == 'line'" :key="chartKey" :option="option" autoresize />
+        <v-chart class="chart" v-else-if="chartType == 'bar'" :key="chartKey" :option="option_bar" autoresize />
+        <n-data-table class="chart" v-else :columns="columns" :data="tableData" :bordered="false" />
+      </div>
       <n-modal v-model:show="showModal" preset="dialog" title="Dialog">
         <template #header>
           <div>提交新 UP 主</div>
@@ -311,15 +313,11 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-.n-input-group {
+.chart-container {
   width: 80%;
 }
 
-.n-tabs {
-  width: 80%;
-}
-
-.n-tab-pane {
+.chart {
   height: 75vh;
 }
 </style>
