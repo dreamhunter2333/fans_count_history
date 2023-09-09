@@ -84,14 +84,23 @@ const curColumn = [
         title: 'Action',
         key: 'actions',
         render(row) {
-            return h(NPopconfirm,
-                {
-                    onPositiveClick: () => deleteAccount(row.id)
-                },
-                {
-                    trigger: () => h(NButton, { type: "error" }, () => '删除'),
-                    default: () => '确认删除？'
-                })
+            return h('div', [
+                h(NButton,
+                    {
+                        type: 'success',
+                        onClick: () => crawlerThirdPart(row.id)
+                    },
+                    { default: () => '从第三方爬取数据' }
+                ),
+                h(NPopconfirm,
+                    {
+                        onPositiveClick: () => deleteAccount(row.id)
+                    },
+                    {
+                        trigger: () => h(NButton, { type: "error" }, () => '删除'),
+                        default: () => '确认删除？'
+                    })
+            ])
         }
     }
 ]
@@ -198,6 +207,18 @@ const deleteAccount = async (id) => {
         await fetchData(`/admin/accounts/${id}`, "DELETE")
         message.success("删除成功");
         refresh();
+    } catch (e) {
+        message.error(e.message || "error");
+    } finally {
+        loading.value = false;
+    }
+}
+
+const crawlerThirdPart = async (id) => {
+    loading.value = true;
+    try {
+        await fetchData(`/admin/third_part_data/${id}`, "POST")
+        message.success("爬取成功");
     } catch (e) {
         message.error(e.message || "error");
     } finally {

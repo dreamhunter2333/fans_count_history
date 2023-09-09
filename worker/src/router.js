@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { crawler_third_part } from './crawler'
 
 const api = new Hono()
 const headers = {
@@ -143,5 +144,19 @@ api.delete('/admin/accounts/:id', async (c) => {
     }
     return c.json({ success: true })
 })
+
+api.post('/admin/third_part_data/:id', async (c) => {
+    const account_id = c.req.param('id');
+    if (!account_id) {
+        return c.text("Missing id", 400)
+    }
+    try {
+        await crawler_third_part(account_id, c.env)
+        return c.json({ success: true })
+    } catch (error) {
+        return c.text(error.message, 500)
+    }
+})
+
 
 export { api }
